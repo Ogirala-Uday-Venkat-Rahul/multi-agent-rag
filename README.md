@@ -1,3 +1,13 @@
+---
+title: Multi-Agent RAG Research Assistant
+emoji: 🔎
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Multi-Agent RAG Research Assistant
 
 A research assistant that breaks a hard question into parts, retrieves evidence for
