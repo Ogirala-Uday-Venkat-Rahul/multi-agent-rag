@@ -1,0 +1,28 @@
+# Core orchestration
+langgraph>=0.2.0
+langchain-core>=0.3.0
+
+# Web layer
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+
+# Retrieval / embeddings (all run locally, CPU, free)
+sentence-transformers>=3.0.0
+rank-bm25>=0.2.2
+chromadb>=0.5.0
+
+# pgvector backend (optional — only needed when VECTOR_STORE=pgvector)
+psycopg[binary]>=3.1.0
+pgvector>=0.3.0
+
+# Document loading
+pypdf>=4.0.0
+
+# LLM providers — install only the one you use; all are optional at runtime.
+# groq and google-genai both have free tiers; anthropic/openai are paid.
+groq>=0.11.0
+google-genai>=0.3.0
+anthropic>=0.39.0
+openai>=1.30.0

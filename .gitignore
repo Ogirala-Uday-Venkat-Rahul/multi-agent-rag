@@ -1,0 +1,19 @@
+# Environment / secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Local vector store
+.chroma/
+
+# Model / build caches
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db

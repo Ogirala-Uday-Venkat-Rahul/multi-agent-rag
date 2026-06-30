@@ -1,0 +1,5 @@
+[
+  { "question": "Why does hybrid retrieval combine vector search and BM25?" },
+  { "question": "What does a cross-encoder reranker do, and why isn't it used for first-pass retrieval?" },
+  { "question": "How does a RAG system reduce hallucinations?" }
+]
