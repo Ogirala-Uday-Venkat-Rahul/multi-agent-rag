@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Multi-Agent RAG Research Assistant</title>
+  <style>
+    :root {
+      --bg: #0f1420;
+      --panel: #161d2e;
+      --panel-2: #1d2740;
+      --border: #26314b;
+      --text: #e7ecf5;
+      --muted: #97a3bd;
+      --accent: #5b8cff;
+      --good: #2ecc9b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .wrap { max-width: 780px; margin: 0 auto; padding: 40px 20px 80px; }
+    header h1 { font-size: 1.6rem; margin: 0 0 6px; }
+    header p { color: var(--muted); margin: 0 0 28px; }
+    .ask {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 70px;
+      resize: vertical;
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font: inherit;
+    }
+    textarea:focus { outline: none; border-color: var(--accent); }
+    .row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; gap: 12px; }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; cursor: default; }
+    .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .chip {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+    .chip:hover { color: var(--text); border-color: var(--accent); }
+    .result { margin-top: 26px; display: none; }
+    .result.show { display: block; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card h2 { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+    .verdict { display: flex; gap: 10px; margin-bottom: 12px; }
+    .badge {
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+    .badge.faithful { color: var(--good); border-color: rgba(46,204,155,0.4); background: rgba(46,204,155,0.08); }
+    .badge.unfaithful { color: #ffb24d; border-color: rgba(255,178,77,0.4); background: rgba(255,178,77,0.08); }
+    .answer { white-space: pre-wrap; }
+    .answer sup { color: var(--accent); font-weight: 600; }
+    ul { margin: 0; padding-left: 18px; }
+    li { margin: 4px 0; color: var(--muted); }
+    li b { color: var(--text); font-weight: 500; }
+    .spinner { display: none; color: var(--muted); margin-top: 22px; }
+    .spinner.show { display: block; }
+    .error { color: #ff7a7a; margin-top: 22px; display: none; }
+    .error.show { display: block; }
+    footer { color: var(--muted); font-size: 0.8rem; margin-top: 36px; }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Multi-Agent RAG Research Assistant</h1>
+      <p>Ask a question. A planner splits it into parts, hybrid search retrieves evidence,
+         and a critic checks every claim before you get an answer with citations.</p>
+    </header>
+
+    <div class="ask">
+      <textarea id="q" placeholder="Ask a research question..."></textarea>
+      <div class="row">
+        <span style="color:var(--muted);font-size:0.82rem">Answers are grounded only in the indexed documents.</span>
+        <button id="go">Ask</button>
+      </div>
+    </div>
+
+    <div class="examples" id="examples">
+      <span class="chip">Why does hybrid retrieval combine vector search and BM25?</span>
+      <span class="chip">Why does hybrid retrieval combine vector search and BM25, and how are the results merged?</span>
+      <span class="chip">How do embeddings power semantic search, and what are their limitations?</span>
+    </div>
+
+    <div class="spinner" id="spinner">Thinking through planner → retrieve → synthesize → critic…</div>
+    <div class="error" id="error"></div>
+
+    <div class="result" id="result">
+      <div class="card">
+        <div class="verdict" id="verdict"></div>
+        <h2>Answer</h2>
+        <div class="answer" id="answer"></div>
+      </div>
+      <div class="card">
+        <h2>Sub-questions the planner asked</h2>
+        <ul id="subs"></ul>
+      </div>
+      <div class="card">
+        <h2>Sources</h2>
+        <ul id="sources"></ul>
+      </div>
+    </div>
+
+    <footer>
+      Prefer the raw API? See the <a href="/docs">interactive docs</a>.
+    </footer>
+  </div>
+
+  <script>
+    const q = document.getElementById("q");
+    const go = document.getElementById("go");
+    const spinner = document.getElementById("spinner");
+    const errorBox = document.getElementById("error");
+    const result = document.getElementById("result");
+
+    function esc(s) {
+      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+    // Turn "[2]" citation markers into superscripts.
+    function withCitations(text) {
+      return esc(text).replace(/\[(\d+)\]/g, "<sup>[$1]</sup>");
+    }
+
+    async function ask() {
+      const question = q.value.trim();
+      if (!question) return;
+      go.disabled = true;
+      result.classList.remove("show");
+      errorBox.classList.remove("show");
+      spinner.classList.add("show");
+      try {
+        const res = await fetch("/ask", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ question }),
+        });
+        if (!res.ok) throw new Error("Server returned " + res.status);
+        const data = await res.json();
+        render(data);
+      } catch (e) {
+        errorBox.textContent = "Something went wrong: " + e.message +
+          ". The free Space may be waking up — try again in a moment.";
+        errorBox.classList.add("show");
+      } finally {
+        spinner.classList.remove("show");
+        go.disabled = false;
+      }
+    }
+
+    function render(data) {
+      const verdict = document.getElementById("verdict");
+      const faithful = data.faithful;
+      verdict.innerHTML =
+        '<span class="badge ' + (faithful ? "faithful" : "unfaithful") + '">' +
+        (faithful ? "✓ faithful" : "⚠ unverified") + "</span>" +
+        '<span class="badge">' + data.iterations + " iteration" +
+        (data.iterations === 1 ? "" : "s") + "</span>";
+
+      document.getElementById("answer").innerHTML = withCitations(data.answer);
+
+      document.getElementById("subs").innerHTML =
+        (data.sub_questions || []).map(s => "<li>" + esc(s) + "</li>").join("");
+
+      document.getElementById("sources").innerHTML =
+        (data.citations || []).map(c => "<li><b>[" + c.n + "]</b> " + esc(c.source) + "</li>").join("");
+
+      result.classList.add("show");
+    }
+
+    go.addEventListener("click", ask);
+    q.addEventListener("keydown", e => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") ask();
+    });
+    document.querySelectorAll("#examples .chip").forEach(chip => {
+      chip.addEventListener("click", () => { q.value = chip.textContent.trim(); ask(); });
+    });
+  </script>
+</body>
+</html>

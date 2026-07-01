@@ -7,8 +7,10 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from .agents.graph import answer_question
@@ -18,12 +20,14 @@ from .vectorstore import get_store
 
 app = FastAPI(title="Multi-Agent RAG Research Assistant")
 
+_STATIC = Path(__file__).parent / "static"
+
 
 @app.get("/", include_in_schema=False)
-def root() -> RedirectResponse:
-    # Land on the interactive API docs so the deployed Space opens to something
-    # you can click through, not a bare 404.
-    return RedirectResponse(url="/docs")
+def root() -> FileResponse:
+    # Serve the single-page front end. It's a thin client of /ask; the interactive
+    # API docs are still at /docs.
+    return FileResponse(_STATIC / "index.html")
 
 
 class AskRequest(BaseModel):
