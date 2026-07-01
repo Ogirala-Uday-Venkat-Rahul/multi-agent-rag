@@ -76,7 +76,10 @@ it's running:
 
 ## 5. Seed some documents
 
-The container starts with an empty store. Index something:
+On startup the app seeds itself from `SEED_PATH` (default `data/sample`) when the store
+is empty, so a fresh Space is answerable immediately — no manual step. Set `SEED_PATH=`
+(blank) to disable. To index your own documents, `/ingest` a path that exists on the
+server:
 
 ```bash
 curl -X POST https://<user>-<space>.hf.space/ingest \
@@ -95,9 +98,11 @@ curl -X POST https://<user>-<space>.hf.space/ask \
 ## Note on persistence
 
 A free Space's filesystem is **ephemeral** — the Chroma store resets when the Space
-restarts, so you'd re-run `/ingest`. For durable storage, switch `VECTOR_STORE=pgvector`
-and point `DATABASE_URL` at a free **Supabase** or **Neon** Postgres (both ship pgvector).
-That keeps the index across restarts and is the production-shaped setup.
+restarts. Startup seeding (above) re-indexes the sample docs automatically, so the demo
+survives restarts. For durable storage of your *own* documents, switch
+`VECTOR_STORE=pgvector` and point `DATABASE_URL` at a free **Supabase** or **Neon**
+Postgres (both ship pgvector). That keeps the index across restarts and is the
+production-shaped setup.
 
 ## Alternative: Render
 

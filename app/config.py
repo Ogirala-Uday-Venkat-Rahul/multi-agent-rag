@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     database_url: str = ""
     collection_name: str = "documents"
 
+    # Seed the store from this path on startup when it's empty (blank to disable).
+    # Keeps the demo populated after an ephemeral-storage restart with no manual /ingest.
+    seed_path: str = "data/sample"
+
     # Pipeline knobs
     chunk_size: int = 800
     chunk_overlap: int = 120

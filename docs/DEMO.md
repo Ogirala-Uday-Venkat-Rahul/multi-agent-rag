@@ -17,8 +17,9 @@ cold-starts on the next visit (a rebuild plus a one-time model download — slow
 
 1. Open the live app link a few minutes early so it's awake.
 2. Confirm it's healthy: open `.../health` — it should return
-   `{"status":"ok", ...,"indexed_chunks":3}`. If `indexed_chunks` is `0`, the storage
-   reset — run `POST /ingest` with body `{"path":"data/sample"}` once (from `/docs`) to re-index.
+   `{"status":"ok", ...,"indexed_chunks":3}`. The app auto-seeds the sample docs on
+   startup, so a freshly-woken Space is already populated. (If you ever see `0`, it's
+   still finishing boot — give it a few seconds and refresh.)
 3. Leave the web app open. That's the interface you'll drive.
 
 ## What this is, in one sentence
@@ -108,5 +109,5 @@ graph of roles, not one prompt.
 | Symptom | Cause | Fix |
 |---|---|---|
 | First request hangs ~30–60s | Cold start / model download | Warm it up before presenting |
-| `indexed_chunks: 0` | Storage reset on restart | `POST /ingest` with `{"path":"data/sample"}` |
+| `indexed_chunks: 0` | Still seeding on boot | Wait a few seconds and refresh; auto-seeding runs at startup |
 | Answer says "not in the sources" | Working as designed | That's the faithfulness guardrail — feature, not bug |
