@@ -5,7 +5,8 @@ which questions to ask so the demo shows off the parts that matter.
 
 ## Links
 
-- **Live app:** https://ouvrahul-multi-agent-rag.hf.space/docs
+- **Web app (present this):** https://ouvrahul-multi-agent-rag.hf.space
+- **Interactive API docs (fallback / technical audience):** https://ouvrahul-multi-agent-rag.hf.space/docs
 - **Space page:** https://huggingface.co/spaces/ouvrahul/multi-agent-rag (click the **App** tab)
 - **Source:** https://github.com/Ogirala-Uday-Venkat-Rahul/multi-agent-rag
 
@@ -15,10 +16,10 @@ The Space runs on Hugging Face's free tier, which **sleeps after inactivity** an
 cold-starts on the next visit (a rebuild plus a one-time model download — slow first hit).
 
 1. Open the live app link a few minutes early so it's awake.
-2. Confirm it's healthy: the `GET /health` endpoint should return
+2. Confirm it's healthy: open `.../health` — it should return
    `{"status":"ok", ...,"indexed_chunks":3}`. If `indexed_chunks` is `0`, the storage
-   reset — run `POST /ingest` with body `{"path":"data/sample"}` once to re-index.
-3. Leave the `/docs` page open. That's the interface you'll drive.
+   reset — run `POST /ingest` with body `{"path":"data/sample"}` once (from `/docs`) to re-index.
+3. Leave the web app open. That's the interface you'll drive.
 
 ## What this is, in one sentence
 
@@ -38,9 +39,12 @@ with hybrid search and reranking, writes an answer that **cites its sources**, a
 
 ## Running the demo
 
-On the `/docs` page: expand **POST `/ask`** -> **Try it out** -> edit the JSON body ->
-**Execute**. The response shows the answer, the sub-questions, the citations, and the
-faithfulness verdict.
+On the web app: type a question (or click one of the example chips) and press **Ask**.
+The answer renders with a **faithful** badge and iteration count, the sub-questions the
+planner asked, and the source list. Cmd/Ctrl+Enter also submits.
+
+(Technical audience? The `/docs` page does the same thing over raw HTTP: expand
+**POST `/ask`** -> **Try it out** -> edit the JSON body -> **Execute**.)
 
 ### Question 1 — the happy path (shows decomposition + citations)
 

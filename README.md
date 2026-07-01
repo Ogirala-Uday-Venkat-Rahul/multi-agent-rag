@@ -18,6 +18,15 @@ Built to run end to end on free infrastructure: local embedding and reranking mo
 (CPU, no API key), a free LLM provider (Groq or Gemini), and either an embedded
 ChromaDB store or Postgres + pgvector.
 
+## Live demo
+
+- **Web app:** https://ouvrahul-multi-agent-rag.hf.space
+- **Interactive API docs:** https://ouvrahul-multi-agent-rag.hf.space/docs
+
+Ask a question in the browser and watch it decompose, retrieve, cite, and self-check.
+Hosted free on Hugging Face Spaces — it sleeps when idle, so the first request after a
+while wakes it and takes a moment.
+
 ## How it works
 
 ```
@@ -48,10 +57,10 @@ pip install -r requirements.txt
 cp .env.example .env          # then set LLM_PROVIDER and the matching API key
 
 python -m scripts.ingest_docs data/sample           # index the sample doc
-uvicorn app.main:app --reload                        # serve the API
+uvicorn app.main:app --reload                        # serve the app
 ```
 
-Ask a question:
+Open `http://localhost:8000` for the web UI, or ask over HTTP:
 
 ```bash
 curl -X POST localhost:8000/ask \

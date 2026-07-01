@@ -1,8 +1,12 @@
 # Deploying to Hugging Face Spaces (free)
 
+> **Live instance:** https://ouvrahul-multi-agent-rag.hf.space — the web UI is at `/`,
+> the interactive API docs at `/docs`.
+
 The repo ships a `Dockerfile` already set up for a Hugging Face **Docker Space**
 (non-root user, port 7860). HF's free CPU tier gives 16 GB RAM, which is what the
-local embedding + reranker models need.
+local embedding + reranker models need. Once the Space is up, `/` serves the single-page
+web client and `/docs` exposes the raw API.
 
 > I can't create your HF account or push to it for you — those need your login.
 > Everything below is the exact sequence; it's ~5 minutes.

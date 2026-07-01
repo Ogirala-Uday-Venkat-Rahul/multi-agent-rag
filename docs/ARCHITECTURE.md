@@ -17,8 +17,14 @@ app/
     graph.py       LangGraph wiring + answer_question()
   eval/
     evaluate.py    RAGAS-style LLM-judge harness
-  main.py          FastAPI surface
+  main.py          FastAPI surface (JSON endpoints + serves the front end)
+  static/
+    index.html     single-page web client, calls /ask
 ```
+
+The web page is a thin client with no build step or framework — it just `fetch`es the
+same `/ask` endpoint any other caller would use. The API stays the single source of
+truth; the UI is one more consumer of it.
 
 The design principle: each external dependency (LLM vendor, vector backend, embedding
 model) sits behind a small interface, so swapping one never touches the agent logic.
